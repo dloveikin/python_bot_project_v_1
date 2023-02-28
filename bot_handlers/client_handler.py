@@ -10,7 +10,10 @@ from resume_doc.generate_pdf import create_pdf
 async def command_start(message: types.Message, state=FSMContext):
     sending_message = f'''
     Привіт <b>{message.from_user.first_name} {message.from_user.last_name}!</b>\n
-Давай зробимо візитку.'''
+Це бот допоможе тобі створити твоє власне резюме.\n
+Бот буде задавати питання щодо Вашої освіти, навичок та контактної інформації. Після опитування Ви зможете
+завантажити готовий файл у форматі .pdf\n
+Для початку опитування скористайтесь командою /create'''
     await bot.send_message(message.chat.id, sending_message, parse_mode="html", reply_markup=kb_cl)
 
     @dp.message_handler()
@@ -60,9 +63,7 @@ async def cansel_all_data(message: types.Message, state=FSMContext):
 
 async def cansel_current_data(message: types.Message, state=FSMContext):
     current_state = await state.get_state()
-    print(current_state, "стейт до очищення")
     await FSMData.previous()
-    print(current_state, "стейт після очищення")
     if current_state == "FSMData:login" or current_state is None:
         await state.finish()
         await message.reply("Данні вводу відсутні")
@@ -70,7 +71,7 @@ async def cansel_current_data(message: types.Message, state=FSMContext):
 
     else:
         await bot.send_message(message.from_user.id, "Поточна відповідь на питання була очищенна\n"
-                                                     "Будь-ласка, дайте відповідь на минуле питання")
+                                                     "Будь ласка, надайте відповідь на попереднє питання")
 
 
 async def command_create(message: types.Message, state=FSMContext):
@@ -80,7 +81,7 @@ async def command_create(message: types.Message, state=FSMContext):
     async with state.proxy() as data:
         # save machine state to dictionary
         data['login'] = user_login
-    await bot.send_message(message.from_user.id, "Як до тебе можна звертатися?", reply_markup=kb_cl_0)
+    await bot.send_message(message.from_user.id, "Як до Вас можна звертатися?", reply_markup=kb_cl_0)
     await FSMData.next()
 
 
@@ -91,7 +92,7 @@ async def usr_first_name(message: types.Message, state=FSMContext):
     async with state.proxy() as data:
         # save machine state to dictionary
         data['first_name'] = message.text
-    await message.reply("Тепер введи фамілію", reply_markup=kb_cl_1)
+    await message.reply("Будь ласка, введіть своє прізвище", reply_markup=kb_cl_1)
     await FSMData.next()
     # next state
 
@@ -102,19 +103,17 @@ async def usr_last_name(message: types.Message, state=FSMContext):
     async with state.proxy() as data:
         # save machine state to dictionary
         data['last_name'] = message.text
-    await message.reply("Тепер введи свій номер телефону", reply_markup=kb_cl_1)
+    await message.reply("Введіть свій контактний номер телефону у фрматі:\n"
+                        "+380NNNNNNNNN", reply_markup=kb_cl_1)
     await FSMData.next()
 
-    # next state
 
 
 async def usr_phone_number(message: types.Message, state=FSMContext):
-    # await FSMData.next()
-    # await message.reply("Тепер введи свій номер телефону", reply_markup=kb_cl_1)
     async with state.proxy() as data:
         # save machine state to dictionary
         data['phone_number'] = message.text
-    await message.reply("Зараз необхідно додати електрону пошту", reply_markup=kb_cl_1)
+    await message.reply("Введіть адрес своєї робочої електроної пошти", reply_markup=kb_cl_1)
     await FSMData.next()
     # next state
 
@@ -123,7 +122,7 @@ async def usr_mail(message: types.Message, state=FSMContext):
     async with state.proxy() as data:
         # save machine state to dictionary
         data['mail'] = message.text
-    await message.reply("Зараз необхідно додати опис посади", reply_markup=kb_cl_1)
+    await message.reply("Будь ласка, введіть посаду яка Вас зацікавила", reply_markup=kb_cl_1)
     await FSMData.next()
 
 
@@ -131,7 +130,7 @@ async def usr_vacantion(message: types.Message, state=FSMContext):
     async with state.proxy() as data:
         # save machine state to dictionary
         data['vacantion'] = message.text
-    await message.reply("Будь-ласка завантажте своє фото у фрматі файлу без стиснення", reply_markup=kb_cl_1)
+    await message.reply("Будь ласка, завантажте своє фото у форматі файлу без стиснення", reply_markup=kb_cl_1)
     await FSMData.next()
 
 
@@ -214,7 +213,7 @@ async def command_create_job(message: types.Message, state=FSMContext):
     async with state.proxy() as data:
         # save machine state to dictionary
         data['login'] = user_login
-    await bot.send_message(message.from_user.id, "Ким ти працював?", reply_markup=kb_cl_0)
+    await bot.send_message(message.from_user.id, "Ким Ви раніше працювали?", reply_markup=kb_cl_0)
     await FSMJob.next()
 
 
@@ -231,7 +230,8 @@ async def job_position(message: types.Message, state=FSMContext):
     async with state.proxy() as data:
         # save machine state to dictionary
         data['position'] = message.text
-    await message.reply("Тепер введи роки роботи", reply_markup=kb_cl_1)
+    await message.reply("Введіть роки, в які ви працювали на минулій посаді\n"
+                        "У зручному для Вас форматі", reply_markup=kb_cl_1)
     await FSMJob.next()
     # next state
 
@@ -240,7 +240,7 @@ async def job_years(message: types.Message, state=FSMContext):
     async with state.proxy() as data:
         # save machine state to dictionary
         data['years'] = message.text
-    await message.reply("Чим ти займався на цій посаді?", reply_markup=kb_cl_1)
+    await message.reply("Додайте опис Ваших обов'язків на минулої посади.", reply_markup=kb_cl_1)
     await FSMJob.next()
     # next state
 
@@ -250,17 +250,6 @@ async def job_description(message: types.Message, state=FSMContext):
         # save machine state to dictionary
         data['description'] = message.text
     await message.reply("Чудово, всі данні були успішно записані", reply_markup=kb_cl_1)
-    # вивід повного складу словника
-    await bot.send_message(message.from_user.id, tuple(data.values()))
-    await bot.send_message(message.from_user.id, f"""
-    Давай перевіримо твої данні:\n
-    Посада на якій ти працював: {data["position"]}\n
-    Роки роботи: {data["years"]}\n 
-    Опис роботи: {data["description"]}\n""")
-    # writing to database part
-
-    # await sql_add_data(state)
-    # await orm_add_data(state)
     await orm_add_job(state)
     await state.finish()
     await menu_job(message)
@@ -283,7 +272,7 @@ async def create_education(message: types.Message, state=FSMContext):
         # save machine state to dictionary
         data['login'] = user_login
     await FSMEducation.next()
-    await bot.send_message(message.from_user.id, "Де саме ти навчався?", reply_markup=kb_cl_0)
+    await bot.send_message(message.from_user.id, "Напишіть заклад освіти у якому Ви навчалися", reply_markup=kb_cl_0)
     await FSMEducation.next()
 
 
@@ -291,7 +280,7 @@ async def education_place(message: types.Message, state=FSMContext):
     async with state.proxy() as data:
         # save machine state to dictionary
         data['place'] = message.text
-    await message.answer("Як називається твоя спеціальніть?", reply_markup=kb_cl_1)
+    await message.answer("Як називається Ваша спеціальніть?", reply_markup=kb_cl_1)
     await FSMEducation.next()
 
 
@@ -299,7 +288,7 @@ async def education_name(message: types.Message, state=FSMContext):
     async with state.proxy() as data:
          # save machine state to dictionary
         data['name'] = message.text
-    await message.answer("Який у тебе ступінь?", reply_markup=kb_cl_1)
+    await message.answer("Який у Вас ступінь освіти?", reply_markup=kb_cl_1)
     await FSMEducation.next()
 
 
@@ -308,12 +297,6 @@ async def education_grade(message: types.Message, state=FSMContext):
         # save machine state to dictionary
         data['grade'] = message.text
     await message.reply("Чудово, всі данні були успішно записані", reply_markup=kb_cl_1)
-    # вивід повного складу словника
-    await bot.send_message(message.from_user.id, tuple(data.values()))
-    await bot.send_message(message.from_user.id, f"""
-            Давай перевіримо твої данні:\n
-            Твоя спеціальність: {data["name"]}\n
-            Твій ступінь: {data["grade"]}\n""")
     # writing to database part
     await orm_add_education(state)
     await state.finish()
