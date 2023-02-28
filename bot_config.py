@@ -11,3 +11,6 @@ fsm_memory = MemoryStorage()
 # Initialize bot and dispatcher
 bot = Bot(token=api_token)
 dp = Dispatcher(bot, storage=fsm_memory)
+
+
+photo_path = 'C:/Users/danyl/GitHub/python_bot_project_v_1/resume_doc/photo/'

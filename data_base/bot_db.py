@@ -51,7 +51,7 @@ async def sql_read(message):
 
 
 async def sql_delete(login):
-    print(login)
+    # print(login)
     cursor.execute(f"""
     delete from user_data
     where login = ?""", [login])
